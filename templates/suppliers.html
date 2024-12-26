@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1>Suppliers Management</h1>
+    
+    <div class="search-bar">
+        <label for="supplierSearch">Search:</label>
+        <input type="text" id="supplierSearch" placeholder="Search suppliers...">
+        <label for="searchBy">Search by:</label>
+        <select id="searchBy">
+            <option value="name">Name</option>
+            <option value="contact">Contact Person</option>
+            <option value="phone">Phone</option>
+            <option value="email">Email</option>
+            <option value="address">Address</option>
+        </select>
+    </div>
+
+    <div class="action-buttons">
+        <button onclick="showAddSupplierForm()" class="primary-button">Add New Supplier</button>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if 'success' in message %}success{% endif %}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div id="addSupplierForm" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="hideAddSupplierForm()">&times;</span>
+            <h2>Add New Supplier</h2>
+            <form method="POST" action="{{ url_for('add_supplier') }}" autocomplete="off">
+                <table class="form-table">
+                    <tr>
+                        <td><label for="name">Supplier Name:</label></td>
+                        <td><input type="text" id="name" name="name" required></td>
+                        <td><label for="contact">Contact Person:</label></td>
+                        <td><input type="text" id="contact" name="contact"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="phone">Phone Number:</label></td>
+                        <td><input type="tel" id="phone" name="phone"></td>
+                        <td><label for="email">Email:</label></td>
+                        <td><input type="email" id="email" name="email"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="address">Address:</label></td>
+                        <td colspan="3"><textarea id="address" name="address" rows="2"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><label for="balance">Opening Balance:</label></td>
+                        <td><input type="number" id="balance" name="balance" step="0.01" value="0"></td>
+                        <td colspan="2"></td>
+                    </tr>
+                </table>
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">Add Supplier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="data-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supplier in suppliers %}
+                <tr>
+                    <td data-field="name">
+                        <a href="#" onclick="showSupplierHistory('{{ supplier.id }}', '{{ supplier.name }}')" class="entity-link">
+                            {{ supplier.name }}
+                        </a>
+                    </td>
+                    <td>{{ supplier.contact }}</td>
+                    <td>{{ supplier.phone }}</td>
+                    <td>{{ supplier.email }}</td>
+                    <td>{{ supplier.address }}</td>
+                    <td>${{ "%.2f"|format(supplier.balance) }}</td>
+                    <td>
+                        <button onclick="editSupplier('{{ supplier.id }}')" class="edit-button">Edit</button>
+                        <button onclick="deleteSupplier('{{ supplier.id }}')" class="delete-button">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include 'history_modal.html' %}
+<script src="{{ url_for('static', filename='js/suppliers.js') }}"></script>
+{% endblock %} 

@@ -1,0 +1,89 @@
+{% extends "base_invoice.html" %}
+
+{% block content %}
+<div class="invoice-container" id="invoice">
+    <div class="invoice-header">
+        {% if settings.logo_path %}
+        <img src="{{ settings.logo_path }}" alt="Business Logo" class="invoice-logo">
+        {% endif %}
+        <div class="business-info">
+            <h2>{{ settings.business_name }}</h2>
+            {% if settings.address %}<p>{{ settings.address }}</p>{% endif %}
+            {% if settings.phone %}<p>Phone: {{ settings.phone }}</p>{% endif %}
+            {% if settings.email %}<p>Email: {{ settings.email }}</p>{% endif %}
+            {% if settings.tax_number %}<p>Tax Number: {{ settings.tax_number }}</p>{% endif %}
+        </div>
+    </div>
+
+    <div class="invoice-details">
+        <div class="invoice-type">
+            {{ transaction.type|upper }} INVOICE
+        </div>
+        <table class="details-table">
+            <tr>
+                <td>Invoice #:</td>
+                <td>{{ transaction.id }}</td>
+                <td>Date:</td>
+                <td>{{ transaction.formatted_date }}</td>
+            </tr>
+            <tr>
+                <td>{{ 'Customer' if transaction.type == 'sale' else 'Supplier' }}:</td>
+                <td>{{ transaction.entity_name }}</td>
+                <td>Status:</td>
+                <td>{{ transaction.status }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="invoice-items">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(item.price) }}</td>
+                    <td>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(item.line_total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="invoice-summary">
+        <table class="summary-table">
+            <tr>
+                <td>Subtotal:</td>
+                <td>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(transaction.total_amount) }}</td>
+            </tr>
+            <tr>
+                <td>Paid Amount:</td>
+                <td>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(transaction.paid_amount) }}</td>
+            </tr>
+            <tr class="balance">
+                <td>Balance:</td>
+                <td>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(transaction.total_amount - transaction.paid_amount) }}</td>
+            </tr>
+        </table>
+    </div>
+
+    {% if settings.footer_text %}
+    <div class="invoice-footer">
+        {{ settings.footer_text }}
+    </div>
+    {% endif %}
+</div>
+
+<div class="invoice-actions">
+    <button onclick="window.print()" class="primary-button">Print Invoice</button>
+    <button onclick="window.history.back()" class="secondary-button">Back</button>
+</div>
+{% endblock %} 

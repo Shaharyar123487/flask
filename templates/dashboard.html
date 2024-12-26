@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="card">
+            <div class="card-icon sales-icon">💰</div>
+            <div class="card-content">
+                <h3>Total Sales</h3>
+                <p>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(financials.total_sales) }}</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon purchases-icon">🛍️</div>
+            <div class="card-content">
+                <h3>Total Purchases</h3>
+                <p>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(financials.total_purchases) }}</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon receivables-icon">📥</div>
+            <div class="card-content">
+                <h3>Receivables</h3>
+                <p>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(financials.receivables) }}</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon payables-icon">📤</div>
+            <div class="card-content">
+                <h3>Payables</h3>
+                <p>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(financials.payables) }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-container">
+            <h3>Sales vs Purchases</h3>
+            <canvas id="salesPurchasesChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Top Selling Products</h3>
+            <canvas id="topProductsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="transactions-section">
+        <div class="recent-sales">
+            <h3>Recent Sales</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in recent_sales %}
+                    <tr>
+                        <td>{{ sale.formatted_date }}</td>
+                        <td>{{ sale.customer_name }}</td>
+                        <td>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(sale.total_amount) }}</td>
+                        <td>
+                            <span class="status-badge {{ 'paid' if sale.paid_amount >= sale.total_amount else 'partial' if sale.paid_amount > 0 else 'unpaid' }}">
+                                {{ 'Paid' if sale.paid_amount >= sale.total_amount else 'Partial' if sale.paid_amount > 0 else 'Unpaid' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="recent-purchases">
+            <h3>Recent Purchases</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Supplier</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for purchase in recent_purchases %}
+                    <tr>
+                        <td>{{ purchase.formatted_date }}</td>
+                        <td>{{ purchase.supplier_name }}</td>
+                        <td>{{ settings.currency_symbol if settings.currency_symbol else '$' }}{{ "%.2f"|format(purchase.total_amount) }}</td>
+                        <td>
+                            <span class="status-badge {{ 'paid' if purchase.paid_amount >= purchase.total_amount else 'partial' if purchase.paid_amount > 0 else 'unpaid' }}">
+                                {{ 'Paid' if purchase.paid_amount >= purchase.total_amount else 'Partial' if purchase.paid_amount > 0 else 'Unpaid' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="info-section">
+        <div class="low-stock">
+            <h3>Low Stock Alert</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in low_stock %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="counts-summary">
+            <h3>Quick Stats</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Customers</span>
+                    <span class="stat-value">{{ counts.customers }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Suppliers</span>
+                    <span class="stat-value">{{ counts.suppliers }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Products</span>
+                    <span class="stat-value">{{ counts.products }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Sales vs Purchases Chart
+const salesPurchasesChart = new Chart(
+    document.getElementById('salesPurchasesChart'),
+    {
+        type: 'line',
+        data: {
+            labels: {{ monthly_sales|map(attribute='month')|list|tojson }},
+            datasets: [{
+                label: 'Sales',
+                data: {{ monthly_sales|map(attribute='total')|list|tojson }},
+                borderColor: '#4CAF50',
+                tension: 0.1
+            },
+            {
+                label: 'Purchases',
+                data: {{ monthly_purchases|map(attribute='total')|list|tojson }},
+                borderColor: '#2196F3',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    }
+);
+
+// Top Products Chart
+const topProductsChart = new Chart(
+    document.getElementById('topProductsChart'),
+    {
+        type: 'bar',
+        data: {
+            labels: {{ top_products|map(attribute='name')|list|tojson }},
+            datasets: [{
+                label: 'Quantity Sold',
+                data: {{ top_products|map(attribute='total_quantity')|list|tojson }},
+                backgroundColor: '#4CAF50'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    }
+);
+</script>
+{% endblock %} 

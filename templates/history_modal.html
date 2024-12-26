@@ -1,0 +1,52 @@
+<div id="historyModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideHistoryModal()">&times;</span>
+        <div class="history-header">
+            <h2 id="historyTitle"></h2>
+            <div class="balance-section">
+                <span>Current Balance: </span>
+                <span id="currentBalance" class="balance-amount"></span>
+                <button onclick="showPaymentForm()" class="primary-button">Make Payment</button>
+            </div>
+        </div>
+        
+        <div class="transaction-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTransactions"></tbody>
+            </table>
+        </div>
+        
+        <div id="paymentForm" class="payment-form" style="display: none;">
+            <h3>Make Payment</h3>
+            <form onsubmit="submitPayment(event)">
+                <div class="form-group">
+                    <label for="paymentAmount">Amount:</label>
+                    <input type="number" id="paymentAmount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method:</label>
+                    <select id="paymentMethod" required>
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="check">Check</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="paymentReference">Reference:</label>
+                    <input type="text" id="paymentReference">
+                </div>
+                <button type="submit" class="primary-button">Submit Payment</button>
+            </form>
+        </div>
+    </div>
+</div> 

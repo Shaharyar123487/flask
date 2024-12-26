@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %} - Business Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Business Management</h3>
+            </div>
+            <nav>
+                <a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+                <a href="{{ url_for('suppliers') }}" {% if request.endpoint == 'suppliers' %}class="active"{% endif %}>Suppliers</a>
+                <a href="{{ url_for('customers') }}" {% if request.endpoint == 'customers' %}class="active"{% endif %}>Customers</a>
+                <a href="{{ url_for('sales') }}" {% if request.endpoint == 'sales' %}class="active"{% endif %}>Sales</a>
+                <a href="{{ url_for('purchases') }}" {% if request.endpoint == 'purchases' %}class="active"{% endif %}>Purchases</a>
+                <a href="{{ url_for('products') }}" {% if request.endpoint == 'products' %}class="active"{% endif %}>Products</a>
+                <a href="{{ url_for('expenses') }}" {% if request.endpoint == 'expenses' %}class="active"{% endif %}>Expenses</a>
+                <a href="{{ url_for('returns') }}" {% if request.endpoint == 'returns' %}class="active"{% endif %}>Returns</a>
+                <a href="{{ url_for('reports') }}" {% if request.endpoint == 'reports' %}class="active"{% endif %}>Reports</a>
+                <a href="{{ url_for('settings') }}" {% if request.endpoint == 'settings' %}class="active"{% endif %}>Settings</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </div>
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/products.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/suppliers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/customers.js') }}"></script>
+</body>
+</html> 

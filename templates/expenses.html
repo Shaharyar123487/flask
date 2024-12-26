@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Expenses{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1>Expenses Management</h1>
+    
+    <div class="action-buttons">
+        <button onclick="showAddExpenseForm()" class="primary-button">Add New Expense</button>
+        <button onclick="showAddCategoryForm()" class="secondary-button">Add Category</button>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if 'success' in message %}success{% endif %}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div id="addExpenseForm" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="hideAddExpenseForm()">&times;</span>
+            <h2>Add New Expense</h2>
+            <form method="POST" action="{{ url_for('add_expense') }}" id="expenseForm" autocomplete="off">
+                <div class="form-header">
+                    <table class="form-table">
+                        <tr>
+                            <td><label for="date">Date:</label></td>
+                            <td><input type="date" id="date" name="date" required></td>
+                            <td><label for="category">Category:</label></td>
+                            <td>
+                                <select id="category" name="category_id" required>
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="amount">Amount:</label></td>
+                            <td><input type="number" id="amount" name="amount" step="0.01" required></td>
+                            <td><label for="payment_method">Payment Method:</label></td>
+                            <td>
+                                <select id="payment_method" name="payment_method" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="bank">Bank Transfer</option>
+                                    <option value="card">Card</option>
+                                    <option value="cheque">Cheque</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="reference_no">Reference No:</label></td>
+                            <td><input type="text" id="reference_no" name="reference_no"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="description">Description:</label></td>
+                            <td colspan="3">
+                                <textarea id="description" name="description" rows="3" required></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">Save Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="addCategoryForm" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="hideAddCategoryForm()">&times;</span>
+            <h2>Add New Category</h2>
+            <form method="POST" action="{{ url_for('add_expense_category') }}">
+                <div class="form-group">
+                    <label for="category_name">Category Name:</label>
+                    <input type="text" id="category_name" name="name" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="data-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Payment Method</th>
+                    <th>Reference</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.date }}</td>
+                    <td>{{ expense.category_name }}</td>
+                    <td>{{ expense.description }}</td>
+                    <td>${{ "%.2f"|format(expense.amount) }}</td>
+                    <td>{{ expense.payment_method.title() }}</td>
+                    <td>{{ expense.reference_no or '-' }}</td>
+                    <td>
+                        <button onclick="editExpense('{{ expense.id }}')" class="edit-button">Edit</button>
+                        <button onclick="deleteExpense('{{ expense.id }}')" class="delete-button">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/expenses.js') }}"></script>
+{% endblock %} 

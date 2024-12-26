@@ -1,0 +1,62 @@
+@media print {
+    body {
+        background: white;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .invoice-container {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        max-width: none;
+        border-radius: 0;
+    }
+    
+    .invoice-container::before {
+        display: none;
+    }
+    
+    .invoice-header {
+        color: #333;
+    }
+    
+    .invoice-logo {
+        filter: none;
+    }
+    
+    .business-info h2 {
+        color: #333;
+    }
+    
+    .business-info p {
+        color: #666;
+    }
+    
+    .invoice-actions {
+        display: none;
+    }
+    
+    @page {
+        margin: 0.5cm;
+        size: A4;
+    }
+    
+    .invoice-items table {
+        page-break-inside: avoid;
+    }
+    
+    .invoice-footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+    
+    .invoice-items th {
+        background: #f5f5f5 !important;
+        color: #333 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+} 

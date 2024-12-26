@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<script>
+    // Initialize summary data from server
+    const initialSummary = {{ summary|tojson|safe }};
+</script>
+<div class="content-container">
+    <h1>Financial Reports</h1>
+
+    <div class="reports-nav">
+        <button onclick="showReport('all')" class="nav-button" id="allBtn">All Transactions</button>
+        <button onclick="showReport('customer')" class="nav-button active" id="customerBtn">Customer Ledger</button>
+        <button onclick="showReport('supplier')" class="nav-button" id="supplierBtn">Supplier Ledger</button>
+        <button onclick="showReport('expense')" class="nav-button" id="expenseBtn">Expense Report</button>
+        <button onclick="showReport('summary')" class="nav-button" id="summaryBtn">Summary</button>
+        <button onclick="showReport('profitLoss')" class="nav-button" id="profitLossBtn">Profit & Loss</button>
+    </div>
+
+    <div class="report-filters">
+        <div class="filter-group">
+            <label for="dateFrom">From:</label>
+            <input type="date" id="dateFrom" onchange="updateReport()">
+            <label for="dateTo">To:</label>
+            <input type="date" id="dateTo" onchange="updateReport()">
+        </div>
+        <div class="filter-group">
+            <label for="searchInput">Search:</label>
+            <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterReport()">
+        </div>
+        <div class="filter-group" id="entityFilter">
+            <label for="entitySelect">Select Entity:</label>
+            <select id="entitySelect" onchange="updateReport()">
+                <option value="">All</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="customerReport" class="report-section">
+        <h2>Customer Ledger</h2>
+        <div class="table-container">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTransactions"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="supplierReport" class="report-section" style="display: none;">
+        <h2>Supplier Ledger</h2>
+        <div class="table-container">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Supplier</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="supplierTransactions"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="expenseReport" class="report-section" style="display: none;">
+        <h2>Expense Report</h2>
+        <div class="table-container">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Payment Method</th>
+                        <th>Reference</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="expenseTransactions"></tbody>
+            </table>
+            <div class="total-section">
+                <strong>Total Expenses:</strong>
+                <span id="expenseTotal">$0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="summaryReport" class="report-section" style="display: none;">
+        <h2>Financial Summary</h2>
+        <div class="summary-cards"></div>
+    </div>
+
+    <div id="profitLossReport" class="report-section" style="display: none;">
+        <h2>Profit & Loss Statement</h2>
+        <div class="pl-sections"></div>
+    </div>
+
+    <div id="allReport" class="report-section" style="display: none;">
+        <h2>All Transactions</h2>
+        <div class="filter-group">
+            <label>Transaction Type:</label>
+            <select id="transactionTypeFilter" onchange="updateReport()">
+                <option value="">All Types</option>
+                <option value="sale">Sales</option>
+                <option value="purchase">Purchases</option>
+                <option value="return">Returns</option>
+            </select>
+        </div>
+        <div class="table-container">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Entity</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="allTransactions"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="transactionModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideTransactionModal()">&times;</span>
+        <div id="transactionDetails"></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %} 

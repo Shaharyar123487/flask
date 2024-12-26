@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Products{% endblock %}
+
+{% block content %}
+    <div class="products-container">
+        <h1>Products Management</h1>
+        
+        <div class="search-bar">
+            <label for="productSearch">Search:</label>
+            <input type="text" id="productSearch" placeholder="Search products...">
+            <label for="searchBy">Search by:</label>
+            <select id="searchBy">
+                <option value="name">Name</option>
+                <option value="description">Description</option>
+            </select>
+        </div>
+
+        <div class="action-buttons">
+            <button onclick="showAddProductForm()" class="primary-button">Add New Product</button>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if 'success' in message %}success{% endif %}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div id="addProductForm" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="hideAddProductForm()">&times;</span>
+                <h2>Add New Product</h2>
+                <form method="POST" action="{{ url_for('add_product') }}" autocomplete="off">
+                    <table class="form-table">
+                        <tr>
+                            <td><label for="name">Product Name:</label></td>
+                            <td><input type="text" id="name" name="name" required></td>
+                        </tr>
+                        <tr>
+                            <td><label for="supplier_price">Supplier Price:</label></td>
+                            <td><input type="number" id="supplier_price" name="supplier_price" step="0.01" required></td>
+                            <td><label for="wholesale_price">Wholesale Price:</label></td>
+                            <td><input type="number" id="wholesale_price" name="wholesale_price" step="0.01" required></td>
+                        </tr>
+                        <tr>
+                            <td><label for="retail_price">Retail Price:</label></td>
+                            <td><input type="number" id="retail_price" name="retail_price" step="0.01" required></td>
+                            <td><label for="quantity">Initial Quantity:</label></td>
+                            <td><input type="number" id="quantity" name="quantity" required></td>
+                        </tr>
+                        <tr>
+                            <td><label for="description">Description:</label></td>
+                            <td colspan="3"><textarea id="description" name="description" rows="2"></textarea></td>
+                        </tr>
+                    </table>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-button">Add Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="products-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Supplier Price</th>
+                        <th>Wholesale Price</th>
+                        <th>Retail Price</th>
+                        <th>Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td data-field="name">{{ product.name }}</td>
+                        <td>${{ "%.2f"|format(product.supplier_price) }}</td>
+                        <td>${{ "%.2f"|format(product.wholesale_price) }}</td>
+                        <td>${{ "%.2f"|format(product.retail_price) }}</td>
+                        <td>{{ product.quantity }}</td>
+                        <td>
+                            <button onclick="editProduct('{{ product.id }}')" class="edit-button">Edit</button>
+                            <button onclick="deleteProduct('{{ product.id }}')" class="delete-button">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/products.js') }}"></script>
+{% endblock %} 

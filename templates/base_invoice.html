@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice - {{ transaction.id }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/invoice.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/invoice_print.css') }}" media="print">
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html> 

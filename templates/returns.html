@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Returns{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1>Returns Management</h1>
+    
+    <div class="action-buttons">
+        <button onclick="showAddReturnForm('customer')" class="primary-button">Add Customer Return</button>
+        <button onclick="showAddReturnForm('supplier')" class="primary-button">Add Supplier Return</button>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if 'success' in message %}success{% endif %}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div id="addReturnForm" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="hideAddReturnForm()">&times;</span>
+            <h2 id="returnFormTitle">Add Return</h2>
+            <form method="POST" action="{{ url_for('add_return') }}" id="returnForm" autocomplete="off">
+                <input type="hidden" name="return_type" id="return_type">
+                
+                <div class="form-header">
+                    <table class="form-table">
+                        <tr>
+                            <td><label id="entityLabel" for="entity">From:</label></td>
+                            <td>
+                                <select id="entity" name="entity_id" required>
+                                    <option value="">Select...</option>
+                                </select>
+                            </td>
+                            <td><label for="refund_amount">Refund Amount:</label></td>
+                            <td><input type="number" id="refund_amount" name="refund_amount" step="0.01" required></td>
+                        </tr>
+                        <tr>
+                            <td><label for="reason">Reason:</label></td>
+                            <td colspan="3">
+                                <input type="text" id="reason" name="reason" required>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="items-container">
+                    <div class="items-header">
+                        <h3>Return Items</h3>
+                    </div>
+                    <div class="items-body">
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-product">Product</th>
+                                    <th class="col-qty">Quantity</th>
+                                    <th class="col-price">Original Price</th>
+                                    <th class="col-price">Return Price</th>
+                                    <th class="col-total">Line Total</th>
+                                    <th class="col-action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsTableBody">
+                                <tr class="item-row">
+                                    <td>
+                                        <select name="products[]" required onchange="updateReturnPrice(this)">
+                                            <option value="">Select Product</option>
+                                            {% for product in products %}
+                                                <option value="{{ product.id }}" 
+                                                        data-supplier-price="{{ product.supplier_price }}"
+                                                        data-retail-price="{{ product.retail_price }}">
+                                                    {{ product.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="quantities[]" value="1" min="1" 
+                                               onchange="updateTotal(this)" required>
+                                    </td>
+                                    <td>
+                                        <span class="original-price">0.00</span>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="prices[]" step="0.01" 
+                                               onchange="updateTotal(this)" required>
+                                    </td>
+                                    <td>
+                                        <span class="item-total">0.00</span>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="delete-button" 
+                                                onclick="removeItem(this)">Remove</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="padding: 10px;">
+                        <button type="button" class="secondary-button" onclick="addItem()">Add Item</button>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <div class="total-section">
+                        <strong>Total Amount:</strong>
+                        <span id="totalAmount" class="total-amount">$0.00</span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-button">Save Return</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="data-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Entity</th>
+                    <th>Total Amount</th>
+                    <th>Refund Amount</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for return in returns %}
+                <tr>
+                    <td>{{ return.formatted_date }}</td>
+                    <td>{{ return.return_type|title }}</td>
+                    <td>{{ return.entity_name }}</td>
+                    <td>${{ "%.2f"|format(return.total_amount) }}</td>
+                    <td>${{ "%.2f"|format(return.refund_amount) }}</td>
+                    <td>{{ return.reason }}</td>
+                    <td>
+                        <button onclick="viewReturn('{{ return.id }}')" class="edit-button">View</button>
+                        <button onclick="deleteReturn('{{ return.id }}')" class="delete-button">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/returns.js') }}"></script>
+{% endblock %} 

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1>System Settings</h1>
+
+    <div class="settings-tabs">
+        <button class="tab-button active" onclick="showTab('business')">Business Information</button>
+        <button class="tab-button" onclick="showTab('currency')">Currency Settings</button>
+        <button class="tab-button" onclick="showTab('backup')">Backup & Restore</button>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if 'success' in message %}success{% endif %}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div id="businessTab" class="settings-tab">
+        <h2>Business Information</h2>
+        <form method="POST" action="{{ url_for('update_business_settings') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="business_name">Business Name:</label>
+                <input type="text" id="business_name" name="business_name" value="{{ settings.business_name }}" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <textarea id="address" name="address" rows="3">{{ settings.address }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" value="{{ settings.phone }}">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="{{ settings.email }}">
+            </div>
+            <div class="form-group">
+                <label for="website">Website:</label>
+                <input type="url" id="website" name="website" value="{{ settings.website }}">
+            </div>
+            <div class="form-group">
+                <label for="tax_number">Tax Number:</label>
+                <input type="text" id="tax_number" name="tax_number" value="{{ settings.tax_number }}">
+            </div>
+            <div class="form-group">
+                <label for="logo">Business Logo:</label>
+                <input type="file" id="logo" name="logo" accept="image/*">
+                {% if settings.logo_path %}
+                <img src="{{ settings.logo_path }}" alt="Business Logo" class="settings-logo">
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="footer_text">Invoice Footer Text:</label>
+                <textarea id="footer_text" name="footer_text" rows="2">{{ settings.footer_text }}</textarea>
+            </div>
+            <button type="submit" class="primary-button">Save Business Information</button>
+        </form>
+    </div>
+
+    <div id="currencyTab" class="settings-tab" style="display: none;">
+        <h2>Currency Settings</h2>
+        <form method="POST" action="{{ url_for('update_currency_settings') }}">
+            <div class="form-group">
+                <label for="currency_symbol">Currency Symbol:</label>
+                <input type="text" id="currency_symbol" name="currency_symbol" value="{{ settings.currency_symbol }}" required>
+            </div>
+            <div class="form-group">
+                <label for="currency_code">Currency Code:</label>
+                <input type="text" id="currency_code" name="currency_code" value="{{ settings.currency_code }}" required>
+            </div>
+            <div class="form-group">
+                <label for="decimal_places">Decimal Places:</label>
+                <input type="number" id="decimal_places" name="decimal_places" value="{{ settings.decimal_places }}" min="0" max="4" required>
+            </div>
+            <div class="form-group">
+                <label for="date_format">Date Format:</label>
+                <select id="date_format" name="date_format">
+                    <option value="YYYY-MM-DD" {% if settings.date_format == 'YYYY-MM-DD' %}selected{% endif %}>YYYY-MM-DD</option>
+                    <option value="DD-MM-YYYY" {% if settings.date_format == 'DD-MM-YYYY' %}selected{% endif %}>DD-MM-YYYY</option>
+                    <option value="MM-DD-YYYY" {% if settings.date_format == 'MM-DD-YYYY' %}selected{% endif %}>MM-DD-YYYY</option>
+                </select>
+            </div>
+            <button type="submit" class="primary-button">Save Currency Settings</button>
+        </form>
+    </div>
+
+    <div id="backupTab" class="settings-tab" style="display: none;">
+        <h2>Backup & Restore</h2>
+        <div class="backup-section">
+            <h3>Create Backup</h3>
+            <p>Download a complete backup of your database:</p>
+            <a href="{{ url_for('create_backup') }}" class="primary-button">Download Backup</a>
+        </div>
+        
+        <div class="backup-section">
+            <h3>Restore from Backup</h3>
+            <p>Warning: This will replace all current data with the backup data.</p>
+            <form method="POST" action="{{ url_for('restore_backup') }}" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="backup_file">Select Backup File:</label>
+                    <input type="file" id="backup_file" name="backup_file" accept=".db,.sql" required>
+                </div>
+                <button type="submit" class="warning-button" onclick="return confirm('Are you sure? This will replace all current data!')">
+                    Restore from Backup
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Show selected tab and activate button
+    document.getElementById(tabName + 'Tab').style.display = 'block';
+    document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('active');
+}
+</script>
+{% endblock %} 
